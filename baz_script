@@ -1,0 +1,39 @@
+-- 🧩 Load Rayfield UI
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Zoo Auto-Hatch Pro",
+    LoadingTitle = "Bypassing Proximity Limits...",
+    LoadingSubtitle = "by Tegar",
+    ConfigurationSaving = {Enabled = false}
+})
+
+local Tab = Window:CreateTab("Auto Farm", nil)
+
+Tab:CreateSection("Proximity Automation")
+
+local autoHatch = false
+
+Tab:CreateToggle({
+    Name = "Auto Hatch (Instant)",
+    CurrentValue = false,
+    Callback = function(Value)
+        autoHatch = Value
+        while autoHatch do
+            task.wait(0.1) -- Kecepatan cek
+            -- Mencari semua ProximityPrompt di seluruh Workspace
+            for _, v in pairs(game.Workspace:GetDescendants()) do
+                if v:IsA("ProximityPrompt") then
+                    -- Cek apakah tulisannya 'Hatch' atau semacamnya
+                    if v.ObjectText:find("Hatch") or v.ActionText:find("Hatch") then
+                        -- Paksa eksekusi tombolnya meskipun kamu jauh
+                        fireproximityprompt(v) 
+                    end
+                end
+            end
+        end
+    end,
+})
+
+Tab:CreateSection("Info")
+Tab:CreateParagraph("Cara Kerja", "Script ini akan mendeteksi tombol 'Hatch' yang muncul saat telur siap. Kamu tidak perlu jalan mendekat, script akan otomatis menekannya.")

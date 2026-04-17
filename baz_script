@@ -1,89 +1,24 @@
--- 🧩 Load Rayfield UI
-local success, Rayfield = pcall(function() 
-    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))() 
-end)
-
-if not success then warn("Gagal load Rayfield!") return end
-
-local Window = Rayfield:CreateWindow({
-    Name = "Zoo Premium Hub v4",
-    LoadingTitle = "Bypassing Secret Events...",
-    LoadingSubtitle = "by Tegar",
-    ConfigurationSaving = {Enabled = false}
-})
-
--- 📑 Definisi Tab
-local MainTab = Window:CreateTab("Admin Events", nil)
+-- 🧩 Admin Abuse Pet Database Scraper
 local Shared = require(game.ReplicatedStorage:WaitForChild("Shared"))
-local GameUI = Shared("GameUI")
-local Player = game.Players.LocalPlayer
+local ProductUtil = Shared("GameProductUtility")
+local Translation = Shared("TranslationHelper")
 
-MainTab:CreateSection("Secret Menu Bypasser")
+print("--- MEMINDAI PET ADMIN ABUSE ---")
 
--- 🛠️ Fungsi Utama (Bypass)
-local function tryOpenSecretMenu()
-    local found = false
-    
-    -- Scan seluruh Workspace untuk mencari "Setting" yang punya ScreenName
-    for _, v in pairs(game.Workspace:GetDescendants()) do
-        if v.Name == "Setting" and v:GetAttribute("ScreenName") then
-            local screenName = v:GetAttribute("ScreenName")
-            found = true
-            
-            print("🚀 Target Ketemu: " .. v:GetFullName())
-            
-            -- Eksekusi buka menu
-            local success, err = pcall(function()
-                GameUI:OpenScreen(Player, screenName, {})
-            end)
-            
-            if success then
-                Rayfield:Notify({
-                    Title = "Bypass Berhasil!",
-                    Content = "Menu " .. tostring(screenName) .. " Terbuka!",
-                    Duration = 5
-                })
-            else
-                warn("Gagal buka menu: " .. tostring(err))
-            end
-        end
-    end
-    
-    if not found then
-        Rayfield:Notify({
-            Title = "Gagal",
-            Content = "Menu rahasia belum di-load di map ini!",
-            Duration = 5
-        })
+-- Kita bongkar isi tabel ProductUtility
+-- Biasanya datanya ada di dalam tabel internal bernama _res atau sejenisnya
+for id, data in pairs(debug.getupvalues(ProductUtil.GetResFromName)[1]) do 
+    if type(data) == "table" and (data.AdminAbuseCoin or data.AdminAbuseGem) then
+        -- Ambil nama asli dari Translation Helper
+        local realName = Translation.TranslateByKey(data.LocName or "")
+        
+        print("-------------------------------")
+        print("ID PRODUK: " .. tostring(id))
+        print("NAMA PET : " .. tostring(realName))
+        print("HARGA COIN: " .. tostring(data.AdminAbuseCoin or "N/A"))
+        print("HARGA GEMS: " .. tostring(data.AdminAbuseGem or "N/A"))
+        print("LIMIT BELI: " .. tostring(data.AdminAbuseBuyCount or "N/A"))
     end
 end
 
--- 🛒 Tombol Eksekusi
-MainTab:CreateButton({
-    Name = "🔓 Force Open Admin/Secret Menu",
-    Info = "Membuka menu shop rahasia yang tersembunyi di map",
-    Callback = function()
-        tryOpenSecretMenu()
-    end,
-})
-
-MainTab:CreateSection("Experimental")
-
-MainTab:CreateButton({
-    Name = "👁️ Show Hidden Admin UI (Billboard)",
-    Info = "Menampilkan tulisan melayang di atas area rahasia",
-    Callback = function()
-        -- Kita paksa attribute AdminAbuse aktif di HP kita biar BillboardGui muncul
-        pcall(function()
-            game.Workspace:SetAttribute("AdminAbuseId", Player.UserId)
-            game.Workspace:SetAttribute("AdminAbuseGM", true)
-            Rayfield:Notify({Title = "Visual On", Content = "Cek sekeliling map untuk tanda melayang!", Duration = 5})
-        end)
-    end,
-})
-
-Rayfield:Notify({
-    Title = "Ready!",
-    Content = "Tab Admin Events siap digunakan!",
-    Duration = 5
-})
+print("--- SCAN SELESAI (Cek Console F9) ---")

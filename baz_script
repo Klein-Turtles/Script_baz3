@@ -6,67 +6,75 @@ end)
 if not success then warn("Gagal load Rayfield!") return end
 
 local Window = Rayfield:CreateWindow({
-    Name = "Zoo Admin Pet Sniper",
-    LoadingTitle = "Targeting Rylen...",
+    Name = "Zoo Admin Sniper v6",
+    LoadingTitle = "Loading Admin Potion Shop...",
     LoadingSubtitle = "by Tegar",
     ConfigurationSaving = {Enabled = false}
 })
 
-local Tab = Window:CreateTab("Sniper", nil)
+-- 📑 Definisi Tab
+local Tab = Window:CreateTab("Sniper Shop", nil)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local AdminRE = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("AdminAbuseRE")
 local Shared = require(ReplicatedStorage:WaitForChild("Shared"))
 local ProductUtil = Shared("GameProductUtility")
 local Player = game.Players.LocalPlayer
 
-Tab:CreateSection("Target: Admin_Pet (Rylen)")
-
--- 💰 BELI PAKE KOIN (Direct Remote)
-Tab:CreateButton({
-    Name = "💰 Buy Admin_Pet (COIN)",
-    Callback = function()
+-- 🛠️ Fungsi Helper buat Beli
+local function buyItem(id, method)
+    if method == "coin" then
         AdminRE:FireServer({
             ["event"] = "coinbuy",
-            ["product"] = "Admin_Pet"
+            ["product"] = id
         })
-        Rayfield:Notify({Title = "Snipe Sent", Content = "Mencoba beli Rylen via Coin", Duration = 3})
-    end,
-})
-
--- 💵 BELI PAKE ROBUX (Product Utility)
-Tab:CreateButton({
-    Name = "💵 Buy Admin_Pet (ROBUX)",
-    Callback = function()
-        pcall(function()
-            ProductUtil:BuyGameProduct(Player, "Admin_Pet")
-        end)
-    end,
-})
+    elseif method == "gem" then
+        AdminRE:FireServer({
+            ["event"] = "gembuy",
+            ["product"] = id
+        })
+    elseif method == "robux" then
+        pcall(function() ProductUtil:BuyGameProduct(Player, id) end)
+    end
+    Rayfield:Notify({Title = "Purchase Sent", Content = "ID: " .. id .. " via " .. method, Duration = 2})
+end
 
 ---
 
-Tab:CreateSection("Target: Admin_Pet2")
+Tab:CreateSection("🧪 Admin Potions & Boosts")
 
--- 💰 BELI PAKE KOIN (Admin_Pet2)
-Tab:CreateButton({
-    Name = "💰 Buy Admin_Pet2 (COIN)",
-    Callback = function()
-        AdminRE:FireServer({
-            ["event"] = "coinbuy",
-            ["product"] = "Admin_Pet2"
-        })
-        Rayfield:Notify({Title = "Snipe Sent", Content = "Mencoba beli Admin_Pet2 via Coin", Duration = 3})
-    end,
-})
+-- List Item dari Gambar + Request
+local boosts = {
+    {n = "Speed Hourglass", id = "Admin_SpeedUp"},
+    {n = "Hatch Potion", id = "Admin_HatchPotion"},
+    {n = "Coin Potion", id = "Admin_CoinPotion"}, -- Prediksi ID
+    {n = "Luck Potion", id = "Admin_LuckPotion"}   -- Prediksi ID
+}
 
--- 💵 BELI PAKE ROBUX (Admin_Pet2)
-Tab:CreateButton({
-    Name = "💵 Buy Admin_Pet2 (ROBUX)",
-    Callback = function()
-        pcall(function()
-            ProductUtil:BuyGameProduct(Player, "Admin_Pet2")
-        end)
-    end,
-})
+for _, item in pairs(boosts) do
+    Tab:CreateLabel(item.n)
+    Tab:CreateButton({
+        Name = "Buy " .. item.n .. " (Coin)",
+        Callback = function() buyItem(item.id, "coin") end,
+    })
+    Tab:CreateButton({
+        Name = "Buy " .. item.n .. " (Gem)",
+        Callback = function() buyItem(item.id, "gem") end,
+    })
+    Tab:CreateSection("---")
+end
 
-Rayfield:Notify({Title = "Sniper Ready", Content = "Siapkan Koinmu, Bos!", Duration = 5})
+Tab:CreateSection("🐾 Admin Pets (Special)")
+
+local pets = {
+    {n = "Rylen", id = "Admin_Pet"},
+    {n = "Admin Pet 2", id = "Admin_Pet2"}
+}
+
+for _, pet in pairs(pets) do
+    Tab:CreateButton({
+        Name = "Buy " .. pet.n .. " (Robux/Auto)",
+        Callback = function() buyItem(pet.id, "robux") end,
+    })
+end
+
+Rayfield:Notify({Title = "V6 Active!", Content = "Potion Sniper Ready!", Duration = 5})

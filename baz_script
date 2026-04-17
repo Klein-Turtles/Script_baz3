@@ -1,24 +1,72 @@
--- 🧩 Admin Abuse Pet Database Scraper
-local Shared = require(game.ReplicatedStorage:WaitForChild("Shared"))
+-- 🧩 Load Rayfield UI
+local success, Rayfield = pcall(function() 
+    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))() 
+end)
+
+if not success then warn("Gagal load Rayfield!") return end
+
+local Window = Rayfield:CreateWindow({
+    Name = "Zoo Admin Pet Sniper",
+    LoadingTitle = "Targeting Rylen...",
+    LoadingSubtitle = "by Tegar",
+    ConfigurationSaving = {Enabled = false}
+})
+
+local Tab = Window:CreateTab("Sniper", nil)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AdminRE = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("AdminAbuseRE")
+local Shared = require(ReplicatedStorage:WaitForChild("Shared"))
 local ProductUtil = Shared("GameProductUtility")
-local Translation = Shared("TranslationHelper")
+local Player = game.Players.LocalPlayer
 
-print("--- MEMINDAI PET ADMIN ABUSE ---")
+Tab:CreateSection("Target: Admin_Pet (Rylen)")
 
--- Kita bongkar isi tabel ProductUtility
--- Biasanya datanya ada di dalam tabel internal bernama _res atau sejenisnya
-for id, data in pairs(debug.getupvalues(ProductUtil.GetResFromName)[1]) do 
-    if type(data) == "table" and (data.AdminAbuseCoin or data.AdminAbuseGem) then
-        -- Ambil nama asli dari Translation Helper
-        local realName = Translation.TranslateByKey(data.LocName or "")
-        
-        print("-------------------------------")
-        print("ID PRODUK: " .. tostring(id))
-        print("NAMA PET : " .. tostring(realName))
-        print("HARGA COIN: " .. tostring(data.AdminAbuseCoin or "N/A"))
-        print("HARGA GEMS: " .. tostring(data.AdminAbuseGem or "N/A"))
-        print("LIMIT BELI: " .. tostring(data.AdminAbuseBuyCount or "N/A"))
-    end
-end
+-- 💰 BELI PAKE KOIN (Direct Remote)
+Tab:CreateButton({
+    Name = "💰 Buy Admin_Pet (COIN)",
+    Callback = function()
+        AdminRE:FireServer({
+            ["event"] = "coinbuy",
+            ["product"] = "Admin_Pet"
+        })
+        Rayfield:Notify({Title = "Snipe Sent", Content = "Mencoba beli Rylen via Coin", Duration = 3})
+    end,
+})
 
-print("--- SCAN SELESAI (Cek Console F9) ---")
+-- 💵 BELI PAKE ROBUX (Product Utility)
+Tab:CreateButton({
+    Name = "💵 Buy Admin_Pet (ROBUX)",
+    Callback = function()
+        pcall(function()
+            ProductUtil:BuyGameProduct(Player, "Admin_Pet")
+        end)
+    end,
+})
+
+---
+
+Tab:CreateSection("Target: Admin_Pet2")
+
+-- 💰 BELI PAKE KOIN (Admin_Pet2)
+Tab:CreateButton({
+    Name = "💰 Buy Admin_Pet2 (COIN)",
+    Callback = function()
+        AdminRE:FireServer({
+            ["event"] = "coinbuy",
+            ["product"] = "Admin_Pet2"
+        })
+        Rayfield:Notify({Title = "Snipe Sent", Content = "Mencoba beli Admin_Pet2 via Coin", Duration = 3})
+    end,
+})
+
+-- 💵 BELI PAKE ROBUX (Admin_Pet2)
+Tab:CreateButton({
+    Name = "💵 Buy Admin_Pet2 (ROBUX)",
+    Callback = function()
+        pcall(function()
+            ProductUtil:BuyGameProduct(Player, "Admin_Pet2")
+        end)
+    end,
+})
+
+Rayfield:Notify({Title = "Sniper Ready", Content = "Siapkan Koinmu, Bos!", Duration = 5})

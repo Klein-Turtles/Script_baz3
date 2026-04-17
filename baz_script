@@ -1,39 +1,46 @@
--- 🧩 Load Rayfield UI
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- 🧩 Admin Abuse Auto-Bypasser
+local Shared = require(game.ReplicatedStorage:WaitForChild("Shared"))
+local GameUI = Shared("GameUI")
+local Player = game.Players.LocalPlayer
 
-local Window = Rayfield:CreateWindow({
-    Name = "Zoo Auto-Hatch Pro",
-    LoadingTitle = "Bypassing Proximity Limits...",
-    LoadingSubtitle = "by Tegar",
-    ConfigurationSaving = {Enabled = false}
-})
-
-local Tab = Window:CreateTab("Auto Farm", nil)
-
-Tab:CreateSection("Proximity Automation")
-
-local autoHatch = false
-
-Tab:CreateToggle({
-    Name = "Auto Hatch (Instant)",
-    CurrentValue = false,
-    Callback = function(Value)
-        autoHatch = Value
-        while autoHatch do
-            task.wait(0.1) -- Kecepatan cek
-            -- Mencari semua ProximityPrompt di seluruh Workspace
-            for _, v in pairs(game.Workspace:GetDescendants()) do
-                if v:IsA("ProximityPrompt") then
-                    -- Cek apakah tulisannya 'Hatch' atau semacamnya
-                    if v.ObjectText:find("Hatch") or v.ActionText:find("Hatch") then
-                        -- Paksa eksekusi tombolnya meskipun kamu jauh
-                        fireproximityprompt(v) 
-                    end
-                end
+local function tryOpenSecretMenu()
+    local found = false
+    
+    -- Scan seluruh Workspace untuk mencari "Setting" yang punya ScreenName
+    for _, v in pairs(game.Workspace:GetDescendants()) do
+        if v.Name == "Setting" and v:GetAttribute("ScreenName") then
+            local screenName = v:GetAttribute("ScreenName")
+            found = true
+            
+            print("🚀 Target Ketemu: " .. v:GetFullName())
+            print("Opening Screen: " .. tostring(screenName))
+            
+            -- Eksekusi buka menu
+            local success, err = pcall(function()
+                GameUI:OpenScreen(Player, screenName, {})
+            end)
+            
+            if success then
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Bypass Berhasil!",
+                    Text = "Menu " .. screenName .. " Terbuka!",
+                    Duration = 5
+                })
+            else
+                warn("Gagal buka menu: " .. tostring(err))
             end
         end
-    end,
-})
+    end
+    
+    if not found then
+        print("❌ Gak nemu objek 'Setting' dengan Attribute 'ScreenName'.")
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Error",
+            Text = "Menu Rahasia belum di-load di Workspace!",
+            Duration = 5
+        })
+    end
+end
 
-Tab:CreateSection("Info")
-Tab:CreateParagraph("Cara Kerja", "Script ini akan mendeteksi tombol 'Hatch' yang muncul saat telur siap. Kamu tidak perlu jalan mendekat, script akan otomatis menekannya.")
+-- Langsung jalankan fungsi
+tryOpenSecretMenu()

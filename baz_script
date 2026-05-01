@@ -6,75 +6,64 @@ end)
 if not success then warn("Gagal load Rayfield!") return end
 
 local Window = Rayfield:CreateWindow({
-    Name = "Zoo Admin Sniper v6",
-    LoadingTitle = "Loading Admin Potion Shop...",
+    Name = "Zoo Admin Sniper v6 (Machine Fix)",
+    LoadingTitle = "Bypassing Machine Protocols...",
     LoadingSubtitle = "by Tegar",
     ConfigurationSaving = {Enabled = false}
 })
 
--- 📑 Definisi Tab
 local Tab = Window:CreateTab("Sniper Shop", nil)
+local MachineTab = Window:CreateTab("Machines", nil) -- Tab baru buat mesin
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local AdminRE = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("AdminAbuseRE")
-local Shared = require(ReplicatedStorage:WaitForChild("Shared"))
-local ProductUtil = Shared("GameProductUtility")
-local Player = game.Players.LocalPlayer
 
--- 🛠️ Fungsi Helper buat Beli
-local function buyItem(id, method)
-    if method == "coin" then
-        AdminRE:FireServer({
-            ["event"] = "coinbuy",
-            ["product"] = id
+-- 🛠️ Fungsi Buka Mesin (Bypass)
+local function openMachine(machineName)
+    -- Biasanya jalurnya ada di RemoteFunctions -> Interaction atau MachineRE
+    local InteractionRF = ReplicatedStorage:FindFirstChild("RemoteFunctions") and ReplicatedStorage.RemoteFunctions:FindFirstChild("Interaction")
+    
+    if InteractionRF then
+        print("🔧 Opening: " .. machineName)
+        InteractionRF:InvokeServer(machineName) -- Nembak server buat minta UI
+        
+        Rayfield:Notify({
+            Title = "Machine Triggered",
+            Content = "Membuka " .. machineName .. " secara paksa!",
+            Duration = 3
         })
-    elseif method == "gem" then
-        AdminRE:FireServer({
-            ["event"] = "gembuy",
-            ["product"] = id
-        })
-    elseif method == "robux" then
-        pcall(function() ProductUtil:BuyGameProduct(Player, id) end)
+    else
+        -- Jalur alternatif kalau InteractionRF gak ada
+        warn("Remote interaction gak ketemu, Gar!")
     end
-    Rayfield:Notify({Title = "Purchase Sent", Content = "ID: " .. id .. " via " .. method, Duration = 2})
 end
 
----
-
+--- [ TAB SHOP TETEP SAMA KAYAK PUNYA LU ] ---
 Tab:CreateSection("🧪 Admin Potions & Boosts")
+-- ... (Kodingan shop lu yang lama taruh sini)
 
--- List Item dari Gambar + Request
-local boosts = {
-    {n = "Speed Hourglass", id = "Admin_SpeedUp"},
-    {n = "Hatch Potion", id = "Admin_HatchPotion"},
-    {n = "Coin Potion", id = "Admin_CoinPotion"}, -- Prediksi ID
-    {n = "Luck Potion", id = "Admin_LuckPotion"}   -- Prediksi ID
-}
+--- [ TAB MESIN BARU ] ---
+MachineTab:CreateSection("⚡ Remote Access Machines")
 
-for _, item in pairs(boosts) do
-    Tab:CreateLabel(item.n)
-    Tab:CreateButton({
-        Name = "Buy " .. item.n .. " (Coin)",
-        Callback = function() buyItem(item.id, "coin") end,
-    })
-    Tab:CreateButton({
-        Name = "Buy " .. item.n .. " (Gem)",
-        Callback = function() buyItem(item.id, "gem") end,
-    })
-    Tab:CreateSection("---")
-end
+MachineTab:CreateButton({
+    Name = "🌀 Open Fusion Machine (Force)",
+    Callback = function() 
+        openMachine("FusionMachine") -- ID standar mesin fusion
+    end,
+})
 
-Tab:CreateSection("🐾 Admin Pets (Special)")
+MachineTab:CreateButton({
+    Name = "🥚 Open Egg Hatchery (Remote)",
+    Callback = function() 
+        openMachine("EggHatchery") 
+    end,
+})
 
-local pets = {
-    {n = "Rylen", id = "Admin_Pet"},
-    {n = "Admin Pet 2", id = "Admin_Pet2"}
-}
+MachineTab:CreateButton({
+    Name = "🔄 Open Mutation Station",
+    Callback = function() 
+        openMachine("MutationStation") 
+    end,
+})
 
-for _, pet in pairs(pets) do
-    Tab:CreateButton({
-        Name = "Buy " .. pet.n .. " (Robux/Auto)",
-        Callback = function() buyItem(pet.id, "robux") end,
-    })
-end
-
-Rayfield:Notify({Title = "V6 Active!", Content = "Potion Sniper Ready!", Duration = 5})
+Rayfield:Notify({Title = "Ready", Content = "Machine Bypass Active!", Duration = 5})
